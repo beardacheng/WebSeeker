@@ -18,7 +18,14 @@ class DataPipe {
         try {
             if (this.server === null) {
                 this.server = net.createServer((client) => {
-                    // console.log(`server recv client ${client}`);
+                    const allows = this.remoteConfig["allows"];
+                    if (allows !== undefined && _.size(allows) > 0) {
+                        if (-1 === _.indexOf(allows, client.remoteAddress)) {
+                            client.end();
+                            return;
+                        }
+                    }
+
                     this.clients.push(client);
 
                     client.on('data', (buff) => this.recv(buff));
