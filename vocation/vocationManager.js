@@ -172,10 +172,14 @@ const masterInitFunc = function() {
         dataPipeForWorkers.recvFromPipe('vocationResult', function(v) {
             // console.log('!!vocationResult: ' + JSON.stringify(v));
             const key = v.fromCity + '_' + v.toCity;
-            if (!v.isFound) delete cheapVocations[key];
-            else if (_.find(cheapVocations, function(data) {return v.ret.id == data.ret.id}) === undefined) {
+            if (!v.isFound && cheapVocations[key] !== undefined) {
+                delete cheapVocations[key];
+                dataPipeForApp.sendToPipe('vocations', cheapVocations);
+            }
+            else if (v.isFound && _.find(cheapVocations, function(data) {return v.ret.id == data.ret.id}) === undefined) {
                 cheapVocations[key] = v;
                 dataPipeForApp.sendToPipe('vocationResult', v);
+                dataPipeForApp.sendToPipe('vocations', cheapVocations);
             }
         });
     }();

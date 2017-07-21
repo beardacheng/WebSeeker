@@ -34,9 +34,14 @@ const initFunc = () => {
         });
 
         dataPipeForManager.recvFromPipe('vocationResult', (v) => {
-            cheapVocations[v.fromCity + '_' + v.toCity] = v;
-            User.sendMessages(`发现新的行程：${v.ret.title}`, {});
+            User.sendMessages(`发现新的行程：${v.ret.title}`, v.ret);
         });
+
+        dataPipeForManager.recvFromPipe('vocations', (v) => {
+           cheapVocations = v;
+           redisSet('vocations', cheapVocations);
+        });
+
     }();
 
     const registerHttpCmd = function() {

@@ -13,17 +13,9 @@ const options = {
 };
 
 module.exports = function () {
-    const apnProvider = new apn.Provider(options);
-
-    process.on('exit', () => {
-        if (client !== null) {
-            apnProvider.shutdown();
-        }
-        console.log('apn quit');
-    });
-
     return {
         sendMessage : function(alert, payload, tokens) {
+            const apnProvider = new apn.Provider(options);
             const note = new apn.Notification();
 
             note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
@@ -70,7 +62,7 @@ module.exports = function () {
                 //     ],
                 //         "failed":[]
                 // }
-
+                apnProvider.shutdown();
                 return _.map(result.failed, "device");
             });
         },
