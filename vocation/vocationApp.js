@@ -5,8 +5,9 @@ const GlobalData = require('../globalData');
 const {redisGet, redisSet} = require('../redis');
 const User = require('../user');
 const httpServer = require('../httpServer');
+const config = require('../config');
 
-const pipeConfigForManager = {port: 35001, addr : '10.29.17.23'};
+// const pipeConfigForManager = {port: 35001, addr : '10.29.17.23'};
 const dataPipeForManager = new GlobalData();
 
 const initFunc = () => {
@@ -14,7 +15,7 @@ const initFunc = () => {
     let ignoreIds = [];
 
     const initData = function() {
-        dataPipeForManager.createPipe(pipeConfigForManager);
+        dataPipeForManager.createPipe(config["pipe"]["app2manager"]);
 
         //get data from redis
         redisGet('ignoreIds').then((v) => {

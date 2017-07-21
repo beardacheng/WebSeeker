@@ -2,13 +2,15 @@
 
 const apn = require('apn');
 const _ = require('lodash');
+const config = require('./config');
 
 const options = {
-    token: {
-        key: "./keys/AuthKey_J25H62JXPZ.p8",
-        keyId: "J25H62JXPZ",
-        teamId: "S6TJT95DE7"
-    },
+    // token: {
+    //     key: "./keys/AuthKey_J25H62JXPZ.p8",
+    //     keyId: "J25H62JXPZ",
+    //     teamId: "S6TJT95DE7"
+    // },
+    token : config["apn"],
     production: false
 };
 

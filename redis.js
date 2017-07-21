@@ -2,6 +2,8 @@
 
 const redis = require("redis");
 const bluebird = require('bluebird');
+const config = require('./config');
+
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
@@ -11,7 +13,9 @@ let subClient = null;
 function getClient() {
     if (client === null) {
         console.log('redis connect to server!');
-        client = redis.createClient('6379', 'localhost');
+
+        const {port, addr} = config["redis"];
+        client = redis.createClient( port, addr);
         client.on("error", function (err) {
             console.log("Redis Error " + err);
         });

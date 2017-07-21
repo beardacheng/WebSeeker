@@ -3,6 +3,7 @@
 const cluster = require('cluster');
 const _ = require('lodash');
 const GlobalData = require('../globalData');
+const config = require('../config');
 
 const getNewTask = function() {
     const fromCitys = ['上海', '南宁'];
@@ -136,10 +137,10 @@ const getNewTask = function() {
 }();
 
 // const pipeConfigForWorkers = {port : 9527, addr : '10.29.17.23'};
-const pipeConfigForWorkers = {file : './socks/pipeForWorker'};
+// const pipeConfigForWorkers = {file : './socks/pipeForWorker'};
 const dataPipeForWorkers = new GlobalData();
 
-const pipeConfigForApp = {port: 35001, addr : '10.29.17.23'};
+// const pipeConfigForApp = {port: 35001, addr : '10.29.17.23'};
 const dataPipeForApp = new GlobalData();
 
 const masterInitFunc = function() {
@@ -147,8 +148,8 @@ const masterInitFunc = function() {
     let ignoreIds = [];
 
     const initData = function() {
-        dataPipeForWorkers.createPipe(pipeConfigForWorkers);
-        dataPipeForApp.listenToPipe(pipeConfigForApp);
+        dataPipeForWorkers.createPipe(config["pipe"]["manager2worker"]);
+        dataPipeForApp.listenToPipe(config["pipe"]["app2manager"]);
 
         dataPipeForApp.recvFromPipe('ignoreIds', (data) => {
             ignoreIds = data;
@@ -176,7 +177,7 @@ const masterInitFunc = function() {
                 delete cheapVocations[key];
                 dataPipeForApp.sendToPipe('vocations', cheapVocations);
             }
-            else if (v.isFound && _.find(cheapVocations, function(data) {return v.ret.id == data.ret.id}) === undefined) {
+            else if (v.isFound && _.find(cheapVocations, function(data) {return v.ret.id === data.ret.id}) === undefined) {
                 cheapVocations[key] = v;
                 dataPipeForApp.sendToPipe('vocationResult', v);
                 dataPipeForApp.sendToPipe('vocations', cheapVocations);
@@ -193,7 +194,7 @@ let workerDataApi = {
     })},
 };
 const workerInitFunc = function() {
-    dataPipeForWorkers.listenToPipe(pipeConfigForWorkers);
+    dataPipeForWorkers.listenToPipe(config["pipe"]["manager2worker"]);
     dataPipeForWorkers.sendToPipe('cmd', {name: 'ignoreIds'});
 };
 
