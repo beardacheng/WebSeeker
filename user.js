@@ -3,9 +3,10 @@
 const httpServer = require('./httpServer');
 const {redisHash, redisClient} = require('./redis');
 const apn = require('./applePushMessage');
+const config = require('./config');
 
 const initFunc = function() {
-    httpServer.init(17485);
+    httpServer.init(config["api"]["port"]);
 
     httpServer.addCmd('deviceInfo', function(req) {
         // { id: 'F55C80D8-70A4-4E4A-8850-AE5B0C7E95D0',
