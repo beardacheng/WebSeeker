@@ -16,7 +16,8 @@ if (browser === 'phantomjs') {
 	const capabilities = require('selenium-webdriver/lib/capabilities');
 
 	const args = capabilities.Capabilities.phantomjs();
-	args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/']);
+	// args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/']);
+	args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/', '--proxy=127.0.0.1:1080', '--proxy-type=socks5']);
 	driver = builder.withCapabilities(args).build();
 }
 else {
@@ -248,7 +249,7 @@ var checkFunc = function(from, to) {
 			return yield* dofunc();
 		}
 
-		yield driver.sleep(10000);
+		// yield driver.sleep(10000);
 		return checkRet;
 	};
 }

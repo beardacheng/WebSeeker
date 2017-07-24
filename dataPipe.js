@@ -50,6 +50,15 @@ class DataPipe {
                 process.on('exit', (code) => {
                     if (code !== 0) this.close();
                 });
+
+                //heart beat
+                this.listenTo('HEART_BEAT', () => {
+                    // console.log('HEART_BEAT + ' + Math.floor(Date.now() / 1000));
+                });
+
+                setInterval(() => {
+                    this.send('HEART_BEAT', {});
+                }, 60000);
             }
         }
         catch (err) {
@@ -83,11 +92,15 @@ class DataPipe {
                 const {port, addr, file} = remote;
                 if (file !== undefined) this.client = net.createConnection(file, dealer);
                 else if (port !== undefined || addr !== undefined) this.client = net.createConnection(port, addr, dealer);
-                else throw new Error('ERROR: invalie pip config');
+                else throw new Error('ERROR: invalie pipe config');
                 this.remoteConfig = remote;
 
                 process.on('exit', (code) => {
                     if (code !== 0) this.close();
+                });
+
+                this.listenTo("HEART_BEAT", () => {
+                    this.send("HEART_BEAT", {});
                 });
 
             }
@@ -147,8 +160,6 @@ class DataPipe {
         } catch (err) {
             console.log('PIPE RECV ERROR: ' + err);
         }
-
-
     }
 
     listenTo(name, deal, target) {
