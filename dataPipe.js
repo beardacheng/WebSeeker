@@ -25,9 +25,10 @@ class DataPipe {
                         }
                     }
 
+                    client.recvBuff = null;
                     this.clients.push(client);
 
-                    client.on('data', (buff) => this.recv.call(client, buff));
+                    client.on('data', (buff) => this.recv(buff, client));
                     client.on('end', () => client.end());
                     client.on('close', () => {
                         _.pull(this.clients, client);
@@ -73,8 +74,8 @@ class DataPipe {
             if (this.client === null) {
                 const dealer = () => {
                     // console.log(`client recv server ${this.client}`);
-
-                    this.client.on('data', (buff) => this.recv(buff));
+                    this.client.recvBuff = null;
+                    this.client.on('data', (buff) => this.recv(buff, this.client));
                     this.client.on('end', () => {this.client.end()});
                     this.client.on('close', () => {this.client = null});
                 };
@@ -115,16 +116,16 @@ class DataPipe {
         }
     }
 
-    recv(buff) {
+    recv(buff, client) {
         try {
-            if (this.recvBuff !== null) {
-                buff = Buffer.concat([this.recvBuff, buff], (this.recvBuff.length + buff.length));
-                this.recvBuff = null;
+            if (client.recvBuff !== null) {
+                buff = Buffer.concat([client.recvBuff, buff], (client.recvBuff.length + buff.length));
+                client.recvBuff = null;
             }
 
             if (buff.length < 4) {
                 console.log('len is ' + buff.length);
-                this.recvBuff = Buffer.from(buff);
+                client.recvBuff = Buffer.from(buff);
                 return;
             }
 
@@ -141,7 +142,7 @@ class DataPipe {
             }
 
             if (buff.length > 0) {
-                this.recvBuff = Buffer.from(buff);
+                client.recvBuff = Buffer.from(buff);
             }
         } catch (err) {
             console.log('PIPE RECV ERROR: ' + err);
