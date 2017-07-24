@@ -125,7 +125,8 @@ class DataPipe {
             }
 
             if (buff.length < 4) {
-                this.recvBuff = Buff.from(buff);
+                console.log('len is ' + buff.length);
+                this.recvBuff = Buffer.from(buff);
                 return;
             }
 
