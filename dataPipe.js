@@ -10,7 +10,6 @@ class DataPipe {
         this.client = null;
         this.clients = [];
         this.listeners = [];
-        this.recvBuff = null;
         this.remoteConfig = null;
     }
 
@@ -28,7 +27,7 @@ class DataPipe {
 
                     this.clients.push(client);
 
-                    client.on('data', (buff) => this.recv(buff));
+                    client.on('data', (buff) => this.recv.call(client, buff));
                     client.on('end', () => client.end());
                     client.on('close', () => {
                         _.pull(this.clients, client);
@@ -117,7 +116,6 @@ class DataPipe {
     }
 
     recv(buff) {
-
         try {
             if (this.recvBuff !== null) {
                 buff = Buffer.concat([this.recvBuff, buff], (this.recvBuff.length + buff.length));
