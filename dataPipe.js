@@ -76,8 +76,8 @@ class DataPipe {
                     // console.log(`client recv server ${this.client}`);
 
                     this.client.on('data', (buff) => this.recv(buff));
-                    this.client.on('end', () => {console.log('end'); this.client.end()});
-                    this.client.on('close', () => {console.log('close'); this.client = null});
+                    this.client.on('end', () => {this.client.end()});
+                    this.client.on('close', () => {this.client = null});
                 };
 
                 const {port, addr, file} = remote;
@@ -118,26 +118,36 @@ class DataPipe {
 
     recv(buff) {
 
-        if (this.recvBuff !== null) {
-            buff = Buffer.concat([this.recvBuff, buff], (this.recvBuff.length + buff.length));
-            this.recvBuff = null;
-        }
-
-        let len = buff.readUInt32BE();
-        while (len + 4 <= buff.length) {
-            const data = JSON.parse(buff.toString('utf8', 4, len + 4));
-
-            for (const listener of this.listeners) {
-                if (data.name === listener.name) listener.deal.call(listener.target, data.data);
+        try {
+            if (this.recvBuff !== null) {
+                buff = Buffer.concat([this.recvBuff, buff], (this.recvBuff.length + buff.length));
+                this.recvBuff = null;
             }
 
-            buff = buff.slice(len + 4);
-            if (buff.length >= 4) len = buff.readUInt32BE();
+            if (buff.length < 4) {
+                this.recvBuff = Buff.from(buff);
+                return;
+            }
+
+            let len = buff.readUInt32BE();
+            while (len + 4 <= buff.length) {
+                const data = JSON.parse(buff.toString('utf8', 4, len + 4));
+
+                for (const listener of this.listeners) {
+                    if (data.name === listener.name) listener.deal.call(listener.target, data.data);
+                }
+
+                buff = buff.slice(len + 4);
+                if (buff.length >= 4) len = buff.readUInt32BE();
+            }
+
+            if (buff.length > 0) {
+                this.recvBuff = Buffer.from(buff);
+            }
+        } catch (err) {
+            console.log('PIPE RECV ERROR: ' + err);
         }
 
-        if (buff.length > 0) {
-            this.recvBuff = Buffer.from(buff);
-        }
 
     }
 

@@ -248,6 +248,7 @@ var checkFunc = function(from, to) {
 			return yield* dofunc();
 		}
 
+		yield driver.sleep(10000);
 		return checkRet;
 	};
 }

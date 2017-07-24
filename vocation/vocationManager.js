@@ -6,7 +6,7 @@ const GlobalData = require('../globalData');
 const config = require('../config');
 
 const getNewTask = function() {
-    const fromCitys = ['上海', '南宁'];
+    const fromCitys = ['上海'];
     const toCitys = [ '香港',
         '澳门',
         '台北',
