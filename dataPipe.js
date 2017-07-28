@@ -11,6 +11,7 @@ class DataPipe {
         this.clients = [];
         this.listeners = [];
         this.remoteConfig = null;
+        this.lastHeartbeatTime = Math.floor(Date.now() / 1000);
     }
 
     create(remote = {}) {
@@ -33,6 +34,13 @@ class DataPipe {
                     client.on('close', () => {
                         _.pull(this.clients, client);
                     });
+                    client.on('error', (err) => {
+                        console.log('client Error: ' + err);
+                    });
+                });
+
+                this.server.on('error', (err) => {
+                    console.log('server error' + err);
                 });
 
                 const {port, addr, file} = remote;
@@ -54,6 +62,7 @@ class DataPipe {
                 //heart beat
                 this.listenTo('HEART_BEAT', () => {
                     // console.log('HEART_BEAT + ' + Math.floor(Date.now() / 1000));
+                    this.lastHeartbeatTime = Math.floor(Date.now() / 1000);
                 });
 
                 setInterval(() => {
@@ -70,6 +79,7 @@ class DataPipe {
         if (this.server !== null) {
             this.server.close(() => {
                 // console.log('server closed');
+                this.server.removeAllListeners();
                 this.server = null;
             });
             for(const client of this.clients) client.end();
@@ -86,13 +96,30 @@ class DataPipe {
                     this.client.recvBuff = null;
                     this.client.on('data', (buff) => this.recv(buff, this.client));
                     this.client.on('end', () => {this.client.end()});
-                    this.client.on('close', () => {this.client = null});
+                    this.client.on('close', () => {
+                        this.client.removeAllListeners();
+                        this.client = null;
+                        console.log(remote);
+                    });
                 };
 
                 const {port, addr, file} = remote;
-                if (file !== undefined) this.client = net.createConnection(file, dealer);
-                else if (port !== undefined || addr !== undefined) this.client = net.createConnection(port, addr, dealer);
-                else throw new Error('ERROR: invalie pipe config');
+
+                try {
+                    if (file !== undefined) this.client = net.createConnection(file, dealer);
+                    else if (port !== undefined || addr !== undefined) this.client = net.createConnection(port, addr, dealer);
+
+                    this.client.on('error', (err) => {
+                        console.log(err);
+                        this.client.removeAllListeners();
+                        this.client = null;
+                        setTimeout(() => this.connect(remote), 10000);
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
+
+                // else throw new Error('ERROR: invalie pipe config');
                 this.remoteConfig = remote;
 
                 process.on('exit', (code) => {

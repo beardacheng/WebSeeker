@@ -136,37 +136,51 @@ const getNewTask = function() {
     }
 }();
 
-// const pipeConfigForWorkers = {port : 9527, addr : '10.29.17.23'};
-// const pipeConfigForWorkers = {file : './socks/pipeForWorker'};
-const dataPipeForWorkers = new GlobalData();
 
-// const pipeConfigForApp = {port: 35001, addr : '10.29.17.23'};
+const dataPipeForWorkers = new GlobalData();
 const dataPipeForApp = new GlobalData();
 
 const masterInitFunc = function() {
+    const {redisGet, redisSet} = require('../redis');
+
     let cheapVocations = {};
     let ignoreIds = [];
 
     const initData = function() {
+        //init data pipe
         dataPipeForWorkers.createPipe(config["pipe"]["manager2worker"]);
-        dataPipeForApp.listenToPipe(config["pipe"]["app2manager"]);
+        dataPipeForApp.listenToPipe(config["pipe"]["app2manager"]);   //manager一般在内网，无固定内网IP，所以一般作为客户端连接
 
-        dataPipeForApp.recvFromPipe('ignoreIds', (data) => {
-            ignoreIds = data;
+        dataPipeForApp.recvFromPipe('ignoreId', (id) => {
+            if (_.indexOf(ignoreIds, id) === -1) {
+                ignoreIds.push(id);
+                redisSet('ignoreIds', ignoreIds);
+
+                cheapVocations = _.omitBy(cheapVocations, function(v) {return v.ret.id === id});
+                redisSet('vocations', cheapVocations);
+            }
         });
 
-        dataPipeForApp.recvFromPipe('vocations', (data) => {
-            cheapVocations = data;
+        dataPipeForApp.recvFromPipe('cmd', (req) => {
+            if (req.name === 'vocations') dataPipeForApp.sendToPipe('vocations', _(cheapVocations).values().map('ret').value());
         });
-
-        dataPipeForApp.sendToPipe('cmd', {name:'ignoreIds'});
-        dataPipeForApp.sendToPipe('cmd', {name:'vocations'});
 
         dataPipeForWorkers.recvFromPipe('cmd', (req) => {
             if (req.name === 'ignoreIds') {
                 dataPipeForWorkers.sendToPipe('ignoreIds', ignoreIds);
             }
-        })
+        });
+
+        //get data from redis
+        redisGet('ignoreIds').then((v) => {
+            if (v !== null) ignoreIds = v;
+        });
+        redisGet('vocations').then((v) => {
+            if (v !== null) {
+                cheapVocations = v;
+                dataPipeForApp.sendToPipe('vocations', _(cheapVocations).values().map('ret').value());
+            }
+        });
     }();
 
     const listenToWorkerRet = function() {
@@ -175,12 +189,11 @@ const masterInitFunc = function() {
             const key = v.fromCity + '_' + v.toCity;
             if (!v.isFound && cheapVocations[key] !== undefined) {
                 delete cheapVocations[key];
-                dataPipeForApp.sendToPipe('vocations', cheapVocations);
             }
             else if (v.isFound && _.find(cheapVocations, function(data) {return v.ret.id === data.ret.id}) === undefined) {
                 cheapVocations[key] = v;
+                redisSet('vocations', cheapVocations);
                 dataPipeForApp.sendToPipe('vocationResult', v);
-                dataPipeForApp.sendToPipe('vocations', cheapVocations);
             }
         });
     }();
@@ -195,7 +208,6 @@ let workerDataApi = {
 };
 const workerInitFunc = function() {
     dataPipeForWorkers.listenToPipe(config["pipe"]["manager2worker"]);
-    dataPipeForWorkers.sendToPipe('cmd', {name: 'ignoreIds'});
 };
 
 module.exports = {
@@ -220,6 +232,10 @@ module.exports = {
                     }
                 });
 
+                cluster.on('SIGINT', () => {
+                    cluster.disconnect();
+                });
+
                 masterInitFunc();
 
                 for (let i = 0; i < 4; i++) {
@@ -228,16 +244,38 @@ module.exports = {
 
             } else {
                 workerInitFunc();
+                let recvNewTask = true;
 
                 const mine = cluster.worker;
+
+                mine.on('disconnect', () => {
+                    console.log(`work recv disconnect event`);
+                    recvNewTask = false;
+                });
+
+                process.on('SIGINT', () => {
+
+                });
+
+                process.on('exit', () => {
+                    console.log(`worker exit`);
+                });
+
                 const vocation = require('./vocationWorker');
+                let finishedTaskCount = 0;
                 mine.on('message', (message) => {
                     if (message.cmd === 'NEW_TASK') {
                         console.log(`${mine.id} get task: ${[message.task.fromCity, message.task.toCity]}`);
                         vocation.checkFunc(message.task.fromCity, message.task.toCity).then(ret => {
                             console.log(`worker ${mine.id} ret: ${JSON.stringify(ret)}`);
                             dataPipeForWorkers.sendToPipe('vocationResult', ret);
-                            mine.send({cmd:'GET_TASK'});
+                            finishedTaskCount++;
+
+                            if (recvNewTask && finishedTaskCount < 5) mine.send({cmd:'GET_TASK'});
+                            else {
+                                vocation.finish();
+                                process.exit(0);
+                            }
                         })
                     }
                 });

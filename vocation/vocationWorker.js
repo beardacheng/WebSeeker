@@ -16,8 +16,8 @@ if (browser === 'phantomjs') {
 	const capabilities = require('selenium-webdriver/lib/capabilities');
 
 	const args = capabilities.Capabilities.phantomjs();
-	// args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/']);
-	args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/', '--proxy=127.0.0.1:1080', '--proxy-type=socks5']);
+	args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/']);
+	// args.set("phantomjs.cli.args", ['--disk-cache=true', '--disk-cache-path=/tmp/phantomjs/', '--proxy=127.0.0.1:1080', '--proxy-type=socks5']);
 	driver = builder.withCapabilities(args).build();
 }
 else {
@@ -249,7 +249,7 @@ var checkFunc = function(from, to) {
 			return yield* dofunc();
 		}
 
-		// yield driver.sleep(10000);
+		yield driver.sleep(10000);
 		return checkRet;
 	};
 }
@@ -367,7 +367,21 @@ var toCitys = [ '香港',
 module.exports = {
 	checkFunc(from, to) {
         // return flow.execute(checkFunc(from, to)).then(r => console.log(r));
-        return flow.execute(checkFunc(from, to));
+
+		// const before = process.memoryUsage();
+		// const ret = flow.execute(checkFunc(from, to));
+		// const after = process.memoryUsage();
+        //
+		// const r = {};
+		// r.rss = after.rss - before.rss;
+		// r.heapTotal = after.heapTotal - before.heapTotal;
+		// r.heapUsed = after.heapUsed - before.heapUsed;
+		// r.external = after.external - before.external;
+		// console.log(`${JSON.stringify(r)}`);
+        //
+		// return ret;
+
+		return flow.execute(checkFunc(from, to));
 	},
 	finish() {
 		driver.quit();

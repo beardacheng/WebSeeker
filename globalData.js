@@ -3,6 +3,10 @@
 const DataPipe = require('./dataPipe');
 
 class globalData {
+    get lastHeartbeatTime() {
+        return this.pipe.lastHeartbeatTime;
+    }
+
     sendToPipe(name, value) {
         if (this.pipe !== undefined) this.pipe.send(name, value);
     }

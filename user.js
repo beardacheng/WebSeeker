@@ -8,14 +8,17 @@ const config = require('./config');
 const initFunc = function() {
     httpServer.init(config["api"]["port"]);
 
-    httpServer.addCmd('deviceInfo', function(req) {
-        // { id: 'F55C80D8-70A4-4E4A-8850-AE5B0C7E95D0',
-        // token: '02392c718dbce762669f159311456dffadbc7595293493888dc54658d0313c89' }
-        //用来notify
-        redisClient.saddAsync('deviceToken', req.token);
-        return {ret:'ok'};
-    });
-
+    try {
+        httpServer.addCmd('deviceInfo', function(req) {
+            // { id: 'F55C80D8-70A4-4E4A-8850-AE5B0C7E95D0',
+            // token: '02392c718dbce762669f159311456dffadbc7595293493888dc54658d0313c89' }
+            //用来notify
+            redisClient.saddAsync('deviceToken', req.token);
+            return {ret:'ok'};
+        });
+    } catch (err) {
+        console.log(err);
+    }
 };
 
 const sendApnMessages = function(alert, payload) {

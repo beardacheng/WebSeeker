@@ -1,17 +1,42 @@
 'use strict';
+//
+// const cluster = require('cluster');
+//
+// if (cluster.isMaster) {
+//     console.log(`i am master`);
+//     const worker = cluster.fork();
+//     worker.on('online', () => {
+//         console.log(`worker is online`);
+//     });
+//
+//     process.on('exit', () => {
+//         console.log(`master exit`);
+//     });
+//
+//     process.on('SIGINT', () => {
+//         console.log(`master recv sigint, disconnect child`);
+//         cluster.disconnect();
+//     });
+// } else {
+//     console.log(`i am child`);
+//
+//     const job = setInterval(() => {
+//         console.log(`do sth`);
+//     }, 3000);
+//
+//     cluster.worker.on('disconnect', () => {
+//         console.log(`recv disconnect event`);
+//         clearInterval(job)
+//     });
+//
+//     process.on('exit', () => {
+//         console.log(`child exit`);
+//     });
+//
+//     process.on('SIGINT', () => {
+//
+//     });
+// }
 
-const {Builder, Capabilities} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
+console.log(`${new Date().format("yyyy-MM-dd HH:mm:ss")}`);
 
-const options = new chrome.Options();
-options.addArguments("--proxy-server=socks5://127.0.0.1:1080");
-
-const builder = new Builder;
-const driver = builder
-    .forBrowser('chrome')
-    .setChromeOptions(options)
-    .build();
-
-driver.get('http://www.ip138.com');
-driver.sleep(10000);
-driver.quit();
