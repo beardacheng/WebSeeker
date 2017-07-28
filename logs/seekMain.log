@@ -58857,3 +58857,101 @@ get result count 30
 search to city ok
 click from which city to go
 click order by price
+wait for price show
+get result count 30
+worker 702 ret: {"fromCity":"上海","toCity":"威尼斯","isFound":false,"ret":"2,4210"}
+702 get task: 上海,苏黎世
+input dest city 苏黎世
+search to city ok
+click from which city to go
+click order by price
+worker 700 ret: {"fromCity":"上海","toCity":"巴塞罗那","isFound":false,"ret":"127,4728"}
+worker exit
+worker 17996 died
+worker 704 is online
+704 get task: 上海,圣托里尼
+wait for price show
+get url: http://vacations.ctrip.com/whole-2A100047B126/?searchValue=%E6%B5%B7%E5%B2%9B&searchText=%E6%B5%B7%E5%B2%9B#_taba
+input dest city 圣托里尼
+get result count 30
+worker 701 ret: {"fromCity":"上海","toCity":"莫斯科","isFound":false,"ret":"result low 5"}
+worker exit
+worker 18001 died
+worker 705 is online
+705 get task: 上海,米兰
+get url: http://vacations.ctrip.com/whole-2A100047B126/?searchValue=%E6%B5%B7%E5%B2%9B&searchText=%E6%B5%B7%E5%B2%9B#_taba
+search to city ok
+click from which city to go
+worker 703 ret: {"fromCity":"上海","toCity":"普罗旺斯","isFound":false,"ret":"182,4210"}
+703 get task: 上海,阿姆斯特丹
+input dest city 阿姆斯特丹
+click order by price
+search to city ok
+click from which city to go
+wait for price show
+click order by price
+ERROR: TimeoutError: Waiting for element to be located By(css selector, .start_city_station)
+Wait timed out after 5132ms
+wait for price show
+get result count 30
+get result count 29
+input dest city 米兰
+worker 702 ret: {"fromCity":"上海","toCity":"苏黎世","isFound":false,"ret":"103,4311"}
+worker exit
+worker 18007 died
+worker 706 is online
+706 get task: 上海,法兰克福
+get url: http://vacations.ctrip.com/whole-2A100047B126/?searchValue=%E6%B5%B7%E5%B2%9B&searchText=%E6%B5%B7%E5%B2%9B#_taba
+input dest city 法兰克福
+search to city ok
+click from which city to go
+click order by price
+wait for price show
+search to city ok
+click from which city to go
+get result count 30
+click order by price
+wait for price show
+get result count 30
+worker 704 ret: {"fromCity":"上海","toCity":"圣托里尼","isFound":false,"ret":"469,6065"}
+704 get task: 上海,马德里
+input dest city 马德里
+worker 703 ret: {"fromCity":"上海","toCity":"阿姆斯特丹","isFound":false,"ret":"260,3812"}
+703 get task: 上海,日内瓦
+input dest city 日内瓦
+search to city ok
+click from which city to go
+search to city ok
+click from which city to go
+click order by price
+click order by price
+wait for price show
+get result count 30
+worker 705 ret: {"fromCity":"上海","toCity":"米兰","isFound":false,"ret":"result low 0"}
+705 get task: 上海,基督城
+input dest city 基督城
+ERROR: TimeoutError: Wait timed out after 8001ms
+input dest city 日内瓦
+search to city ok
+click from which city to go
+worker 706 ret: {"fromCity":"上海","toCity":"法兰克福","isFound":false,"ret":"20,4191"}
+706 get task: 上海,香港
+input dest city 香港
+click order by price
+search to city ok
+click from which city to go
+worker 704 ret: {"fromCity":"上海","toCity":"马德里","isFound":false,"ret":"127,4728"}
+704 get task: 上海,澳门
+input dest city 澳门
+search to city ok
+click from which city to go
+search to city ok
+click from which city to go
+click order by price
+click order by price
+wait for price show
+wait for price show
+click order by price
+get result count 30
+get result count 30
+wait for price show
