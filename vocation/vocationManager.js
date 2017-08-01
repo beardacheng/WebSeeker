@@ -155,7 +155,9 @@ const masterInitFunc = function() {
             if (_.indexOf(ignoreIds, id) === -1) {
                 ignoreIds.push(id);
                 redisSet('ignoreIds', ignoreIds);
+            }
 
+            if (_.find(cheapVocations, function(v) {return v.ret.id === id}) !== undefined) {
                 cheapVocations = _.omitBy(cheapVocations, function(v) {return v.ret.id === id});
                 redisSet('vocations', cheapVocations);
             }
