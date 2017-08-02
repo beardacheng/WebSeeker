@@ -216,6 +216,8 @@ module.exports = {
     data : workerDataApi,
     run : function() {
         return  function () {
+            let workerCheckTimer = {};
+
             if (cluster.isMaster) {
                 console.log(`Vocation Master ${process.pid} is running`);
 
@@ -232,6 +234,15 @@ module.exports = {
                     if (message.cmd === 'GET_TASK') {
                         worker.send({cmd: 'NEW_TASK', task:getNewTask()});
                     }
+
+                    if (undefined !== workerCheckTimer[worker.id]) {
+                        clearTimeout(workerCheckTimer[worker.id]);
+                    }
+
+                    workerCheckTimer[worker.id] = setTimeout(() => {
+                        if (!worker.isDead()) worker.kill("SIGKILL");
+                        delete workerCheckTimer[worker.id];
+                    }, 600000);
                 });
 
                 cluster.on('SIGINT', () => {
