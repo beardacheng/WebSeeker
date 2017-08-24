@@ -38,5 +38,5 @@
 //     });
 // }
 
-console.log(`${new Date().format("yyyy-MM-dd HH:mm:ss")}`);
+console.log(`${new Date().getTime()}`);
 

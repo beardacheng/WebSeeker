@@ -92,7 +92,30 @@ var checkFunc = function(from, to) {
 			yield driver.manage().window().setSize(1602,3110);
 
 			//选择出发城市
-			yield driver.wait(until.elementLocated(By.css('.start_city_station')), 5000);
+			let isCaptchaed = false;
+ 			yield driver.wait(until.elementLocated(By.css('.start_city_station')), 5000).then(null, (err) => {
+				console.log(`timeout : ${JSON.stringify(err)}`);
+                isCaptchaed = true;
+
+                //可能遇到了验证码
+				driver.findElement(By.css('#captchaImg')).then((e) => {
+                    // e.takeScreenshot().then((v) => {
+                    //     var body = v.replace(/^data:image\/png;base64,/, "");
+                    //     var newBody = new Buffer(body, 'base64').toString('binary');
+                    //
+                    //     var filePath = "./" + new Date().getTime() + ".png";
+                    //     require('fs').writeFileSync(filePath, newBody, "binary");
+                    // });
+
+                    e.getSize().then(size => {
+                        console.log(`${JSON.stringify(size)}`);
+                    });
+
+				});
+			});
+
+ 			if (isCaptchaed) return;
+
 			var element = yield driver.findElement(By.css('.start_city_station'));
 			yield element.getText().then(function(t){
 				if (!(t.indexOf(fromCity) !== -1)) {
@@ -249,7 +272,7 @@ var checkFunc = function(from, to) {
 			return yield* dofunc();
 		}
 
-		yield driver.sleep(10000);
+		// yield driver.sleep(30000);
 		return checkRet;
 	};
 }
